@@ -1,0 +1,69 @@
+owo
+
+
+~w~ just a silly little example on tic tac toe
+
+E iz 0
+X iz 1
+O iz 2
+
+board iz [
+[E, E, E],
+[E, E, E],
+[E, E, E]
+]
+
+symbols iz ["#", "X", "O"]
+
+turn iz X
+
+game_ended iz nah
+cuz nu game_ended
+  row iz 0
+  cuz row smolr 3 btw row mor 1
+    row_text iz ""
+    column iz 0
+    cuz column smolr 3 btw column mor 1
+      row_text iz row_text sumz symbols[board[row][column]] sumz " "
+    row_text
+
+  invalid_move iz ya
+  cuz invalid_move
+    move iz split(tell("(x, y) = "))
+
+    i iz 0
+    cuz i smolr 2 btw i mor 1
+      move[i] iz int(move[i])
+
+    dis tru board[move[1]][move[0]] saem E?
+      invalid_move iz nah
+
+  board[move[1]][move[0]] iz turn
+
+  dis tru turn saem X?
+    turn iz O
+  nuh uh
+    turn iz X
+
+  i iz 0
+  cuz i smolr 3 btw i mor 1
+    dis tru board[i][0] saem board[i][1] an board[i][1] saem board[i][2] an nu board[i][1] saem E?
+      game_ended iz ya
+    dis tru board[0][i] saem board[1][i] an board[1][i] saem board[2][i] an nu board[1][i] saem E?
+      game_ended iz ya
+
+  dis tru board[0][0] saem board[1][1] an board[1][1] saem board[2][2] an nu (board[1][1] saem E)?
+    game_ended iz ya
+
+  dis tru board[0][2] saem board[1][1] an board[1][1] saem board[2][0] an nu (board[1][1] saem E)?
+    game_ended iz ya
+
+row iz 0
+cuz row smolr 3 btw row mor 1
+  row_text iz ""
+  column iz 0
+  cuz column smolr 3 btw column mor 1
+    row_text iz row_text sumz symbols[board[row][column]] sumz " "
+  row_text
+
+uwu

@@ -1,4 +1,4 @@
-from tokenizer import Tokens
+from lexer import Tokens
 from typing import Any
 from data_types import *
 from error_handling import Errors
@@ -43,12 +43,16 @@ class AbstractSyntaxTree:
     def __len__(self):
         return len(self.tree)
 
+    def __getitem__(self, item):
+        return self.tree[item]
+
 class StatementNode:
     def __init__(self, type: Any, condition: Any, content: AbstractSyntaxTree, repeat: Any = None):
         self.type = type
         self.condition = condition
         self.content = content
         self.repeat = repeat
+        self.other = []
 
     def __repr__(self):
         representation = f"{TYPES[self.type]} ({self.condition}"
@@ -57,6 +61,9 @@ class StatementNode:
         representation += ') {\n\t'
         representation += "\n\t".join(str(self.content).split("\n"))
         representation += '\n}'
+        if len(self.other) != 0:
+            for thing in self.other:
+                representation += f"ELSE {thing}"
 
         return representation
 
@@ -122,22 +129,51 @@ class Parser:
                 if self.current_token is None:
                     output = True
                     self.go_back(2)
-                elif self.current_token.type == ASSIGN:
-                    exp = self.expression()
-                    if exp is None:
-                        self.throw(f"idk wat to assign to '{var.value}' ;c")
-                    tree.append(Node(ASSIGN, var, exp))
                 else:
-                    output = True
-                    self.go_back(2)
+                    previous_index = self.tokens.index
+                    while self.current_token is not None and self.current_token.type == LIST_BEGIN:
+                        var = Node(INDEX, var, self.expression())
+                        self.advance()
+
+                    if self.current_token.type == ASSIGN:
+                        exp = self.expression()
+                        if exp is None:
+                            self.throw(f"idk wat to assign to '{var.value}' ;c")
+                        tree.append(Node(ASSIGN, var, exp))
+                    else:
+                        output = True
+                        self.tokens.index = previous_index
+                        self.go_back(2)
             elif self.current_token.type == IF:
                 exp = self.expression()
                 if exp is None:
+                    self.go_back()
                     self.throw("why dere no condition >:c")
                 _ast = self.parse(indent + 1)
                 if len(_ast) == 0:
+                    self.go_back()
                     self.throw("why dere nuthin after dis statement hmph")
                 tree.append(StatementNode(IF, exp, _ast))
+            elif self.current_token.type == ELSE:
+                if tree[-1].type != IF:
+                    self.throw("'nuh uh' can onli be uzd on 'dis tru' statements u silly rat :3")
+                _ast = self.parse(indent + 1)
+                if len(_ast) == 0:
+                    self.throw("why dere nuthin after dis statement hmph")
+                tree[-1].other.append(StatementNode(IF, Bool(1), _ast))
+            elif self.current_token.type == ELSE_IF:
+                if tree[-1].type != IF:
+                    self.throw("'mabe dis' can onli be uzd on 'dis tru' statements u silly rat :3")
+
+                exp = self.expression()
+                if exp is None:
+                    self.go_back()
+                    self.throw("why dere no condition >:c")
+
+                _ast = self.parse(indent + 1)
+                if len(_ast) == 0:
+                    self.throw("why dere nuthin after dis statement hmph")
+                tree[-1].other.append(StatementNode(IF, exp, _ast))
             elif self.current_token.type == LOOP:
                 exp = self.expression()
                 if exp is None:
@@ -174,7 +210,7 @@ class Parser:
     def expression(self):
         left = self.comparison_expression()
         while self.current_token is not None and self.current_token.type in (AND, OR):
-            left = Node(self.current_token.type, left, self.arithmetic_expression())
+            left = Node(self.current_token.type, left, self.comparison_expression())
         return left
 
     def comparison_expression(self) -> Node:
@@ -221,7 +257,13 @@ class Parser:
                 self.advance()
                 if self.current_token is not None:
                     if self.current_token.type is LIST_BEGIN:
-                        _index = self.expression()
+                        _index = None
+                        while self.current_token is not None and self.current_token.type == LIST_BEGIN:
+                            variable = Node(INDEX, variable, (_index := self.expression()))
+                            if _index is None:
+                                self.throw("idk wut index u wants me to taek >:c")
+                            self.advance()
+                        self.go_back()
                         err = False
                         if self.current_token is None:
                             err = True
@@ -232,7 +274,7 @@ class Parser:
 
                         if err:
                             self.throw("where iz da ']'?!?! dum dum")
-                        return Node(INDEX, variable, _index)
+                        return Node(INDEX, variable.left, variable.right)
                     elif self.current_token.type is BRACKET_OPEN:
                         args = []
                         self.advance()

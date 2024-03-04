@@ -7,7 +7,9 @@ _builtins = {
     "round": lambda *args: round(*args),
     "floor": lambda *args: math.floor(*args),
     "int": lambda *args: int(*args),
-    "tell": lambda *args: input(*args)
+    "tell": lambda *args: input(*args),
+    "str": lambda *args: str(*args),
+    "split": lambda *args: args[0].split(*args[1:])
 }
 
 thingies = {
@@ -26,7 +28,8 @@ thingies = {
     OR: lambda a, b: a or b,
     NOT: lambda a: not a,
     INPUT: lambda: input(),
-    RANDOM: lambda: random.random()
+    RANDOM: lambda: random.random(),
+    NEGATIVE: lambda a: -a
 }
 
 class Interpreter:
@@ -48,7 +51,20 @@ class Interpreter:
             if self.instruction.type == OUTPUT:
                 print(self.eval(self.instruction.left, variables))
             elif self.instruction.type == ASSIGN:
-                variables[self.instruction.left.value] = self.eval(self.instruction.right, variables)
+                if self.instruction.left.type == INDEX:
+                    indexes = []
+                    index_exp = self.instruction.left
+                    while index_exp.type == INDEX:
+                        indexes.append(self.eval(index_exp.right, variables))
+                        index_exp = index_exp.left
+                    indexes = indexes[::-1]
+                    _var = variables[index_exp.value]
+                    while len(indexes) != 1:
+                        _var = _var[indexes[0]]
+                        indexes.pop(0)
+                    _var[indexes[0]] = self.eval(self.instruction.right, variables)
+                else:
+                    variables[self.instruction.left.value] = self.eval(self.instruction.right, variables)
             elif self.instruction.type == WHILE:
                 loop = self.instruction
                 previous_ast = self.ast
@@ -70,6 +86,12 @@ class Interpreter:
                 if self.eval(statement.condition, variables):
                     statement.content.index = -1
                     self.interpret(variables, statement.content)
+                else:
+                    for other in statement.other:
+                        if self.eval(other.condition, variables):
+                            other.content.index = -1
+                            self.interpret(variables, other.content)
+                            break
                 self.ast = previous_ast
 
             self.advance()
@@ -99,6 +121,22 @@ class Interpreter:
             var = expression.left.value
             variables[var] += self.eval(expression.right) * (1 - (2 * (expression.type == DECREASE)))
             return variables[var]
+        elif expression.type == INDEX:
+            indexes = []
+            index_exp = expression.left
+            while index_exp.type == INDEX:
+                indexes.append(self.eval(index_exp.right, variables))
+                index_exp = index_exp.left
+            indexes = indexes[::-1]
+            _var = variables[index_exp.value]
+            while len(indexes):
+                _var = _var[indexes[0]]
+                indexes.pop(0)
+            return _var[self.eval(expression.right, variables)]
+        elif expression.type == LIST:
+            return [self.eval(i, variables) for i in expression.value]
+        elif expression.type == DICT:
+            return {self.eval(key, variables): self.eval(value, variables) for key, value in expression.value.items()}
 
 def interpret(ast: AbstractSyntaxTree) -> None:
     interpreter = Interpreter(ast)

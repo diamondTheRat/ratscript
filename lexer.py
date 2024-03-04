@@ -101,7 +101,7 @@ def valid_indention(line):
     else:
         return True
 
-character_list = (letters := "qwertyuiopasdfghjklzxcvbnm_") + (digits := "1234567890") + " "
+character_list = (letters := "QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm_") + (digits := "1234567890") + " "
 keywords = {
     "takewayz": Subtraction,
     "sumz": Addition,
@@ -131,7 +131,7 @@ string_delimiters = '""'
 list_delimiters = '[]'
 dict_delimiters = '{}'
 
-def tokenize(text: str, mode: int = FILE_TOKENIZATION, testing: bool = False) -> Tokens:
+def lex(text: str, mode: int = FILE_TOKENIZATION, testing: bool = False) -> Tokens:
     error_handler = Errors(text)
 
     tokens = Tokens([])
@@ -240,23 +240,23 @@ def tokenize(text: str, mode: int = FILE_TOKENIZATION, testing: bool = False) ->
                         line_end -= 1
                         tokens.append(Else(), line_index, column - 5, 6)
                     elif word == "mabe":
-                        if column + 4 >= line_length:
-                            err = errors.SyntaxError("u not finish it ;c its 'mabe this' silly :3")
+                        if column + 3 >= line_length:
+                            err = errors.SyntaxError("u not finish it ;c its 'mabe dis' silly :3")
                             error_handler.format(err, line_index, column - 3 - (char == " "), 4)
                             error_handler.throw(err)
-                        if line[column + 1: column + 5] != "this":
+                        if line[column + 1: column + 4] != "dis":
                             err = errors.SyntaxError("u not finish it ;c its 'mabe this' silly :3")
                             error_handler.format(err, line_index, column - 3 - (char == " "), 4)
                             error_handler.throw(err)
                         if line[-1] != "?":
                             err = errors.SyntaxError("'mabe this' statements mus end wif '?' !!!! >:c")
-                            error_handler.format(err, line_index, column - 4, 9)
+                            error_handler.format(err, line_index, column - 4, 8)
                             error_handler.throw(err)
 
-                        column += 4
+                        column += 3
                         line_length -= 1
                         line_end -= 1
-                        tokens.append(ElseIf(), line_index, column - 8, 9)
+                        tokens.append(ElseIf(), line_index, column - 7, 8)
                     else:
                         tokens.append_word(word, line_index, column, (char == " "))
                     word = ""
@@ -268,7 +268,7 @@ def tokenize(text: str, mode: int = FILE_TOKENIZATION, testing: bool = False) ->
                     column += 1
 
                     _content += char
-                tokens.append(String(_content), line_index, column)
+                tokens.append(String(_content.replace(r"\n", "\n")), line_index, column)
             elif char in list_delimiters:
                 if char == list_delimiters[0]:
                     tokens.append(Operator(LIST_BEGIN), line_index, column)
