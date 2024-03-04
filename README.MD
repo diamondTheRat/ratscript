@@ -46,6 +46,7 @@ KEYWORDS
 ```
 smth = Random # [0, 1)
 ```
+
 COMPARISONS
 ```
 saem = Equals
@@ -85,15 +86,15 @@ dis tru <condition>?
 ```
 
 ELIF
-``
+```
 mabe this <condition>?
-<code>
+  <code>
 ```
 
 ELSE
 ```
 nuh uh
-<code>
+  <code>
 ```
 
 WHILE LOOP
