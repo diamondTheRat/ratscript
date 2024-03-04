@@ -27,7 +27,7 @@ VARIABLE TYPES
 INT
 FLOAT
 STRING
-BOOL
+BOOL ya | nah = true | false
 LIST
 DICT
 ```
