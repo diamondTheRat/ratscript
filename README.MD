@@ -135,4 +135,5 @@ int
 str
 split ~w~ instead of `str0.split(str1)` like in python, the syntax is `split(str0, str1)`
 tell ~w~ works like python `input`
+ord
 ```
