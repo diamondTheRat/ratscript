@@ -44,6 +44,12 @@ AND = 42
 OR = 43
 NOT = 44
 BOOL = 45
+CLASS = 46
+DEFINE_END = 47
+DEFINE = 48
+RETURN = 49
+FUNCTION = 50
+NO_OUTPUT = 51
 
 TYPES = {
     ENDL: "ENDL",
@@ -91,7 +97,13 @@ TYPES = {
     AND: "AND",
     OR: "OR",
     NOT: "NOT",
-    BOOL: "BOOL"
+    BOOL: "BOOL",
+    CLASS: "CLASS",
+    DEFINE_END: "DEFINE_END",
+    DEFINE: "DEFINE",
+    RETURN: "RETURN",
+    FUNCTION: "FUNCTION",
+    NO_OUTPUT: "NO_OUTPUT"
 }
 
 class Operator:
@@ -260,7 +272,7 @@ class Dict(Variable):
         super().__init__(DICT, value)
 
     def __repr__(self):
-        return f"{TYPES[self.type]}: {'{'}'{', '.join(['(' + str(i) + ')' + ': ' + '(' + str(v) + ')' for i, v in self.value.items()])}{'}'}"
+        return f"{TYPES[self.type]}: {'{'}{', '.join(['(' + str(i) + ')' + ': ' + '(' + str(v) + ')' for i, v in self.value.items()])}{'}'}"
 
 class Endl:
     def __init__(self):
@@ -268,3 +280,35 @@ class Endl:
 
     def __repr__(self):
         return f"END LINE"
+
+class Class:
+    def __init__(self, name: str = None):
+        self.name = name
+        self.type = CLASS
+
+    def __repr__(self):
+        if self.name is None:
+            return "CLASS"
+        else:
+            return f"CLASS: {self.name}"
+
+class Define:
+    def __init__(self):
+        self.type = DEFINE
+
+    def __repr__(self):
+        return "DEFINE"
+
+class DefineEnd:
+    def __init__(self):
+        self.type = DEFINE_END
+
+    def __repr__(self):
+        return "DEFINE"
+
+class Return:
+    def __init__(self):
+        self.type = RETURN
+
+    def __repr__(self):
+        return "DEFINE"

@@ -46,6 +46,23 @@ class AbstractSyntaxTree:
     def __getitem__(self, item):
         return self.tree[item]
 
+class FunctionNode():
+    def __init__(self, args: list, ast: AbstractSyntaxTree):
+        self.args = args
+        self.content = ast
+        self.type = FUNCTION
+
+    def __repr__(self):
+        representation = f"Function ("
+        representation += ", ".join([str(argument) for argument in self.args])
+
+        representation += ') {\n\t'
+        representation += "\n\t".join(str(self.content).split("\n"))
+        representation += '\n}'
+
+        return representation
+
+
 class StatementNode:
     def __init__(self, type: Any, condition: Any, content: AbstractSyntaxTree, repeat: Any = None):
         self.type = type
@@ -195,8 +212,62 @@ class Parser:
             elif self.current_token.type in SIMPLE_ATOM_TYPES + [LIST_BEGIN, DICT_BEGIN, BRACKET_OPEN]:
                 output = True
                 self.go_back(1)
+            elif self.current_token.type == DEFINE:
+                self.advance()
+                func = self.current_token
+
+                if func is None:
+                    self.throw("chu must put a function thingy after 'maek' silly :3")
+                if func.type != VARIABLE:
+                    self.throw("it haz to be '<name>(<args>)' not wutever u did owo")
+
+                self.advance()
+
+                err = False
+                if self.current_token.type is None:
+                    err = True
+                if self.current_token.type != BRACKET_OPEN:
+                    err = True
+
+                if err:
+                    self.throw("it haz to be '<name>(<args>)' not wutever u did owo")
+
+                args = []
+                self.advance()
+                while self.current_token is not None and self.current_token.type != BRACKET_CLOSE:
+                    if self.current_token.type == VARIABLE:
+                        args.append(self.current_token)
+                        self.advance()
+                    elif self.current_token.type in [SEPARATOR, ENDL, INDENT]:
+                        self.advance()
+                    elif self.current_token.type != BRACKET_CLOSE:
+                        self.throw("wut")
+
+                if self.current_token.type != BRACKET_CLOSE:
+                    self.throw("hmph u iz meant to close the bracket >:c")
+
+                self.advance()
+                err = False
+                if self.current_token.type is None:
+                    err = True
+                if self.current_token.type != DEFINE_END:
+                    err = True
+
+                if err:
+                    self.throw("u forgor the 'do' at the end uwu")
+                _ast = self.parse(indent + 1)
+                if len(_ast) == 0:
+                    self.throw("why dere no code after dis statement hmph")
+                else:
+                    tree.append(Node(ASSIGN, func, FunctionNode(args, _ast)))
+            elif self.current_token.type == RETURN:
+                tree.append(Node(RETURN, self.expression()))
             elif self.current_token.type == ENDL:
                 self.advance()
+            elif self.current_token.type == NO_OUTPUT:
+                exp = self.expression()
+                if exp:
+                    tree.append(Node(NO_OUTPUT, exp))
             else:
                 self.throw("wut u do on this line me no understand")
 

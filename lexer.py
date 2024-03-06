@@ -124,12 +124,17 @@ keywords = {
     "or": Or,
     "nu": Not,
     "nah": lambda: Bool(0),
-    "ya": lambda: Bool(1)
+    "ya": lambda: Bool(1),
+    "thingy": Class,
+    "maek": Define,
+    "do": DefineEnd,
+    "gib": Return
 }
 
 string_delimiters = '""'
 list_delimiters = '[]'
 dict_delimiters = '{}'
+no_output = '#'
 
 def lex(text: str, mode: int = FILE_TOKENIZATION, testing: bool = False) -> Tokens:
     error_handler = Errors(text)
@@ -289,6 +294,8 @@ def lex(text: str, mode: int = FILE_TOKENIZATION, testing: bool = False) -> Toke
                 tokens.append(Operator(BRACKET_CLOSE), line_index, column)
             elif char == "-":
                 tokens.append(Operator(SUBTRACT), line_index, column)
+            elif char == no_output:
+                tokens.append(Operator(NO_OUTPUT), line_index, column)
             else:
                 error_handler.unrecognized_character(line_index, column)
 

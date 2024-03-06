@@ -34,7 +34,8 @@ class Errors:
 
     def inconsistent_indentation(self, line: int) -> NoReturn:
         length = 0
-        line_content = self.prompt.split("\n")[line]
+        _line = self.get_line(line)
+        line_content = self.prompt.split("\n")[_line]
         while line_content[length] == " ":
             length += 1
 

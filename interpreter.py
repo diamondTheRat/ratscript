@@ -9,8 +9,10 @@ _builtins = {
     "int": lambda *args: int(*args),
     "tell": lambda *args: input(*args),
     "str": lambda *args: str(*args),
-    "split": lambda *args: args[0].split(*args[1:])
+    "split": lambda *args: args[0].split(*args[1:]),
+    "len": lambda *args: len(*args)
 }
+
 
 thingies = {
     ADD: lambda a, b: a + b,
@@ -48,7 +50,9 @@ class Interpreter:
         variables = variables or {**_builtins}
         self.advance()
         while self.instruction != None:
-            if self.instruction.type == OUTPUT:
+            if self.instruction.type == RETURN:
+                return self.eval(self.instruction.left, variables)
+            elif self.instruction.type == OUTPUT:
                 print(self.eval(self.instruction.left, variables))
             elif self.instruction.type == ASSIGN:
                 if self.instruction.left.type == INDEX:
@@ -64,7 +68,8 @@ class Interpreter:
                         indexes.pop(0)
                     _var[indexes[0]] = self.eval(self.instruction.right, variables)
                 else:
-                    variables[self.instruction.left.value] = self.eval(self.instruction.right, variables)
+                    _var = self.instruction.left
+                    variables[_var.value] = self.eval(self.instruction.right, variables)
             elif self.instruction.type == WHILE:
                 loop = self.instruction
                 previous_ast = self.ast
@@ -93,12 +98,32 @@ class Interpreter:
                             self.interpret(variables, other.content)
                             break
                 self.ast = previous_ast
+            elif self.instruction.type == NO_OUTPUT:
+                self.eval(self.instruction.left, variables)
 
             self.advance()
 
     def eval(self, expression: Node | Variable, variables: dict = None):
         if expression.type == CALL:
-            return self.eval(expression.function, variables)(*(self.eval(i, variables) for i in expression.arguments))
+            func = self.eval(expression.function, variables)
+            if type(func).__name__ == 'function':
+                return func(*(self.eval(i, variables) for i in expression.arguments))
+            else:
+                new_variables = variables.copy()
+                func = variables[expression.function.value]
+                if len(expression.arguments) != len(func.args):
+                    raise ValueError(f"da function takes {len(func.args)} arguemnts but u gave it {len(expression.arguments)} u silly goober")
+
+                for i, argument in enumerate(func.args):
+                    new_variables[argument.value] = self.eval(expression.arguments[i], variables)
+
+                previous_ast = self.ast
+
+                func.content.index = -1
+                result = self.interpret(new_variables, func.content)
+                self.ast = previous_ast
+                return result
+
         elif expression.type in SIMPLE_ATOM_TYPES:
             if expression.type == VARIABLE:
                 return variables[expression.value]
@@ -137,6 +162,8 @@ class Interpreter:
             return [self.eval(i, variables) for i in expression.value]
         elif expression.type == DICT:
             return {self.eval(key, variables): self.eval(value, variables) for key, value in expression.value.items()}
+        elif expression.type == FUNCTION:
+            return expression
 
 def interpret(ast: AbstractSyntaxTree) -> None:
     interpreter = Interpreter(ast)

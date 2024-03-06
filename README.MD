@@ -79,6 +79,11 @@ OUTPUT
 <expression>
 ```
 
+USE `#` TO NOT OUTPUT
+```
+# <expression> ~w~ this can be used for functions like sort
+```
+
 IF
 ```
 dis tru <condition>?
@@ -107,4 +112,27 @@ FOR LOOP
 ```
 cuz <expression> btw <expression> - use mor / less for a better experience
   <code>
+```
+
+FUNCTIONS
+```
+maek <name>(*<args>) do
+  <code>
+```
+ARGUMENTS DONT SUPPORT DEFAULT PARAMETERS
+
+RETURN
+```
+gib <expression>
+```
+
+BUILTIN FUNCTIONS
+```
+floor
+len
+round
+int
+str
+split ~w~ instead of `str0.split(str1)` like in python, the syntax is `split(str0, str1)`
+tell ~w~ works like python `input`
 ```
