@@ -6,4 +6,4 @@ if "%~1"=="" (
 )
 
 REM Call Python script with the input file
-python %userprofile%/PycharmProjects/rattus_scriptus/run_file.py %1
+python ./run_file.py %1
