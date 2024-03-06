@@ -10,7 +10,8 @@ _builtins = {
     "tell": lambda *args: input(*args),
     "str": lambda *args: str(*args),
     "split": lambda *args: args[0].split(*args[1:]),
-    "len": lambda *args: len(*args)
+    "len": lambda *args: len(*args),
+    "ord": lambda *args: ord(*args)
 }
 
 
