@@ -145,7 +145,7 @@ class Interpreter:
             return result
         elif expression.type in [INCREASE, DECREASE]:
             var = expression.left.value
-            variables[var] += self.eval(expression.right) * (1 - (2 * (expression.type == DECREASE)))
+            variables[var] += self.eval(expression.right, variables) * (1 - (2 * (expression.type == DECREASE)))
             return variables[var]
         elif expression.type == INDEX:
             indexes = []
