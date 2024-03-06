@@ -1,5 +1,5 @@
 import os.path
-import tokenizer
+import lexer
 import parser
 import interpreter
 from colorama import Fore
@@ -11,7 +11,7 @@ try:
     with open(path) as f:
         text = f.read()
 
-    tokens = tokenizer.tokenize(text)
+    tokens = lexer.lex(text)
     ast = parser.parse(tokens)
 
     interpreter.interpret(ast)
