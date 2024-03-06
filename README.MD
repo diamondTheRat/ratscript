@@ -1,3 +1,9 @@
+DEPENDENCIES
+```
+python 3.11(lower might work too)
+colorama
+```
+
 HOW TO USE
 `rats.bat PATH/TO/FILE`
 
